@@ -8,15 +8,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserSignupRequest {
 
-    @JsonProperty("아이디")
+    @JsonProperty("loginId")
     private String loginId;
 
-    @JsonProperty("비번")
+    @JsonProperty("password")
     private String password;
 
-    @JsonProperty("이름")
+    @JsonProperty("name")
     private String name;
 
-    @JsonProperty("주민번호")
+    @JsonProperty("residentNumber")
     private String residentNumber;
 }

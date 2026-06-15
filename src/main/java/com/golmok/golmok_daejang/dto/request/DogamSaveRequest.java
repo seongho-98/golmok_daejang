@@ -10,9 +10,9 @@ import java.util.List;
 @NoArgsConstructor
 public class DogamSaveRequest {
 
-    @JsonProperty("id")
+    @JsonProperty("loginId")
     private String loginId;
 
-    @JsonProperty("캐릭터ID")
+    @JsonProperty("characterIds")
     private List<Long> characterIds;
 }

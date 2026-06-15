@@ -8,12 +8,12 @@ import lombok.Getter;
 @Builder
 public class UserSignupData {
 
-    @JsonProperty("아이디")
+    @JsonProperty("loginId")
     private String loginId;
 
-    @JsonProperty("이름")
+    @JsonProperty("name")
     private String name;
 
-    @JsonProperty("타입")
+    @JsonProperty("type")
     private String type;
 }

@@ -11,25 +11,25 @@ import java.util.List;
 @Builder
 public class UserProfileData {
 
-    @JsonProperty("아이디")
+    @JsonProperty("loginId")
     private String loginId;
 
-    @JsonProperty("성명")
+    @JsonProperty("name")
     private String name;
 
-    @JsonProperty("타입")
+    @JsonProperty("type")
     private String type;
 
-    @JsonProperty("희귀1")
+    @JsonProperty("rarity1")
     private List<CharacterItem> rarity1;
 
-    @JsonProperty("희귀2")
+    @JsonProperty("rarity2")
     private List<CharacterItem> rarity2;
 
-    @JsonProperty("희귀3")
+    @JsonProperty("rarity3")
     private List<CharacterItem> rarity3;
 
-    @JsonProperty("가입일")
+    @JsonProperty("createdAt")
     private LocalDate createdAt;
 
     @Getter
@@ -39,10 +39,10 @@ public class UserProfileData {
         @JsonProperty("imgUrl")
         private String imgUrl;
 
-        @JsonProperty("캐릭터명")
+        @JsonProperty("characterName")
         private String characterName;
 
-        @JsonProperty("가게명")
+        @JsonProperty("businessName")
         private String businessName;
     }
 }

@@ -14,7 +14,7 @@ public class BusinessDashboardResponse {
 
     private boolean success;
 
-    @JsonProperty("캐릭터")
+    @JsonProperty("character")
     private CharacterSummary character;
 
     private DashboardData data;
@@ -23,10 +23,10 @@ public class BusinessDashboardResponse {
     @Builder
     public static class CharacterSummary {
 
-        @JsonProperty("이미지주소")
+        @JsonProperty("imageUrl")
         private String imageUrl;
 
-        @JsonProperty("도감저장수")
+        @JsonProperty("savedCount")
         private long savedCount;
     }
 
@@ -44,13 +44,13 @@ public class BusinessDashboardResponse {
 
             private LocalDate date;
 
-            @JsonProperty("매출")
+            @JsonProperty("revenue")
             private BigDecimal revenue;
 
-            @JsonProperty("결제건수")
+            @JsonProperty("paymentCount")
             private long paymentCount;
 
-            @JsonProperty("방문자수")
+            @JsonProperty("visitorCount")
             private long visitorCount;
         }
 
@@ -58,10 +58,10 @@ public class BusinessDashboardResponse {
         @Builder
         public static class MonthlyStats {
 
-            @JsonProperty("매출")
+            @JsonProperty("revenue")
             private BigDecimal revenue;
 
-            @JsonProperty("전달대비상승률")
+            @JsonProperty("growthRate")
             private double growthRate;
         }
 
@@ -69,13 +69,13 @@ public class BusinessDashboardResponse {
         @Builder
         public static class StatsInfo {
 
-            @JsonProperty("재방문율")
+            @JsonProperty("revisitRate")
             private double revisitRate;
 
-            @JsonProperty("평균좋아요")
+            @JsonProperty("avgLikes")
             private double avgLikes;
 
-            @JsonProperty("좋아요수")
+            @JsonProperty("totalLikes")
             private long totalLikes;
         }
     }

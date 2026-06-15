@@ -8,29 +8,29 @@ import lombok.Getter;
 @Builder
 public class BusinessSignupData {
 
-    @JsonProperty("아이디")
+    @JsonProperty("loginId")
     private String loginId;
 
-    @JsonProperty("사업자번호")
+    @JsonProperty("businessNumber")
     private String businessNumber;
 
-    @JsonProperty("캐릭터")
+    @JsonProperty("character")
     private CharacterInfo character;
 
     @Getter
     @Builder
     public static class CharacterInfo {
 
-        @JsonProperty("캐릭터ID")
+        @JsonProperty("characterId")
         private Long characterId;
 
-        @JsonProperty("이름")
+        @JsonProperty("name")
         private String name;
 
         @JsonProperty("imgUrl")
         private String imgUrl;
 
-        @JsonProperty("희귀도")
+        @JsonProperty("rarity")
         private int rarity;
     }
 }

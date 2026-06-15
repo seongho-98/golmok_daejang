@@ -8,9 +8,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class LoginRequest {
 
-    @JsonProperty("아이디")
+    @JsonProperty("loginId")
     private String loginId;
 
-    @JsonProperty("비번")
+    @JsonProperty("password")
     private String password;
 }

@@ -8,33 +8,33 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BusinessSignupRequest {
 
-    @JsonProperty("아이디")
+    @JsonProperty("loginId")
     private String loginId;
 
-    @JsonProperty("비번")
+    @JsonProperty("password")
     private String password;
 
-    @JsonProperty("성명")
+    @JsonProperty("name")
     private String name;
 
-    @JsonProperty("주민번호")
+    @JsonProperty("residentNumber")
     private String residentNumber;
 
-    @JsonProperty("사업자번호")
+    @JsonProperty("businessNumber")
     private String businessNumber;
 
-    @JsonProperty("업체명")
+    @JsonProperty("businessName")
     private String businessName;
 
-    @JsonProperty("업태명")
+    @JsonProperty("businessType")
     private String businessType;
 
-    @JsonProperty("캐릭터파일")
+    @JsonProperty("characterFile")
     private String characterFile; // base64 이미지
 
-    @JsonProperty("캐릭터명")
+    @JsonProperty("characterName")
     private String characterName;
 
-    @JsonProperty("희귀도")
+    @JsonProperty("rarity")
     private int rarity; // 1~3
 }

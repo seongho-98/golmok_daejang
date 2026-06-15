@@ -9,23 +9,23 @@ import lombok.Getter;
 @Builder
 public class LoginData {
 
-    @JsonProperty("사용자")
+    @JsonProperty("user")
     private UserInfo user;
 
     @Getter
     @Builder
     public static class UserInfo {
 
-        @JsonProperty("아이디")
+        @JsonProperty("loginId")
         private String loginId;
 
-        @JsonProperty("이름")
+        @JsonProperty("name")
         private String name;
 
-        @JsonProperty("타입")
+        @JsonProperty("type")
         private String type; // "개인" or "사업자"
 
-        @JsonProperty("사업자번호")
+        @JsonProperty("businessNumber")
         @JsonInclude(JsonInclude.Include.NON_NULL)
         private String businessNumber; // 사업자 로그인 시에만 포함
     }

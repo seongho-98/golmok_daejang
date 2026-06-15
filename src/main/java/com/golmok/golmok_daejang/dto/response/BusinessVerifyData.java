@@ -10,29 +10,29 @@ import java.util.List;
 @Builder
 public class BusinessVerifyData {
 
-    @JsonProperty("개인사업자정보")
+    @JsonProperty("businesses")
     private List<BusinessItem> businesses;
 
     @Getter
     @Builder
     public static class BusinessItem {
 
-        @JsonProperty("업체명")
+        @JsonProperty("businessName")
         private String businessName;
 
-        @JsonProperty("사업자번호")
+        @JsonProperty("businessNumber")
         private String businessNumber;
 
-        @JsonProperty("소재지")
+        @JsonProperty("address")
         private String address;
 
-        @JsonProperty("업태명")
+        @JsonProperty("businessType")
         private String businessType;
 
-        @JsonProperty("대표자명")
+        @JsonProperty("ownerName")
         private String ownerName;
 
-        @JsonProperty("개업일")
+        @JsonProperty("openDate")
         private String openDate; // 외부 API 연동 전 null 반환
     }
 }

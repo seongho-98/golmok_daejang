@@ -8,9 +8,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BusinessVerifyRequest {
 
-    @JsonProperty("이름")
+    @JsonProperty("name")
     private String name;
 
-    @JsonProperty("주민번호")
+    @JsonProperty("residentNumber")
     private String residentNumber;
 }
