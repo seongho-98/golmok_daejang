@@ -8,6 +8,9 @@ gradle/wrapper/gradle-wrapper.properties
 **/application.properties
 **/application.yml
 
+### Environment Variables ###
+.env
+
 ### STS ###
 .apt_generated
 .classpath
