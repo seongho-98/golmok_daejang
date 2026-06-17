@@ -135,10 +135,11 @@ public class FoundryAgentService {
                     }
 
                     String text = contentObject.get("text").getAsString();
+                    String normalizedText = normalizeJsonText(text);
                     try {
-                        JsonElement parsedText = JsonParser.parseString(text);
+                        JsonElement parsedText = JsonParser.parseString(normalizedText);
                         if (parsedText.isJsonObject()) {
-                            return mapJsonToContent(parsedText.getAsJsonObject(), text);
+                            return mapJsonToContent(parsedText.getAsJsonObject(), normalizedText);
                         }
                     } catch (Exception ignored) {
                         // Agent가 plain text를 반환하면 텍스트 필드로 반환합니다.
@@ -156,8 +157,10 @@ public class FoundryAgentService {
     }
 
     private BusinessAgentContent mapJsonToContent(JsonObject payload, String rawText) {
-        List<String> featureKeywords = readStringArray(payload, "특징키워드", "featureKeywords");
-        List<String> characterNames = readStringArray(payload, "캐릭터명", "characterNames");
+        List<String> featureKeywords = readStringArray(payload,
+                "특징키워드", "특징_키워드", "featureKeywords", "feature_keywords");
+        List<String> characterNames = readStringArray(payload,
+                "캐릭터명", "캐릭터명_3가지", "characterNames", "character_names");
 
         String text = payload.has("text") && !payload.get("text").isJsonNull()
                 ? payload.get("text").getAsString()
@@ -170,12 +173,13 @@ public class FoundryAgentService {
                 .build();
     }
 
-    private List<String> readStringArray(JsonObject payload, String primaryKey, String secondaryKey) {
+    private List<String> readStringArray(JsonObject payload, String... candidateKeys) {
         JsonArray array = null;
-        if (payload.has(primaryKey) && payload.get(primaryKey).isJsonArray()) {
-            array = payload.getAsJsonArray(primaryKey);
-        } else if (payload.has(secondaryKey) && payload.get(secondaryKey).isJsonArray()) {
-            array = payload.getAsJsonArray(secondaryKey);
+        for (String key : candidateKeys) {
+            if (payload.has(key) && payload.get(key).isJsonArray()) {
+                array = payload.getAsJsonArray(key);
+                break;
+            }
         }
 
         if (array == null) {
@@ -189,6 +193,16 @@ public class FoundryAgentService {
             }
         }
         return values;
+    }
+
+    private String normalizeJsonText(String text) {
+        String trimmed = text == null ? "" : text.trim();
+        if (!trimmed.startsWith("```")) {
+            return trimmed;
+        }
+
+        String withoutStartFence = trimmed.replaceFirst("^```(?:json)?\\s*", "");
+        return withoutStartFence.replaceFirst("\\s*```$", "").trim();
     }
 }
 

@@ -11,14 +11,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class BusinessAgentResponse {
+public class BusinessSearchPayload {
 
     private String businessName;
     private String businessAddress;
-    private BusinessAgentContent agentResponse;
-    private List<BusinessImageGenerationPayload> imageGenerationPayloads;
-    private BusinessSearchPayload searchPayload;
-    private boolean success;
-    private String message;
+    private List<String> featureKeywords;
 }
 
