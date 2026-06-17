@@ -24,4 +24,10 @@ public class UserController {
         userService.saveDogam(req);
         return ApiResponse.ok();
     }
+
+    // 업종 동선 추천 (A → B → C)
+    @GetMapping("/api/users/recommend-business-types")
+    public ApiResponse<?> recommendBusinessTypes(@RequestParam("residentNumber") String residentNumber) {
+        return ApiResponse.ok(userService.recommendBusinessTypes(residentNumber));
+    }
 }

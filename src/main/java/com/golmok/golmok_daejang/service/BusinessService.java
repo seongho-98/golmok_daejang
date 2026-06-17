@@ -44,12 +44,13 @@ public class BusinessService {
         int lastMonth = thisMonth == 1 ? 12 : thisMonth - 1;
         int lastMonthYear = thisMonth == 1 ? thisYear - 1 : thisYear;
 
-        BigDecimal todayRevenue = transactionHistoryRepository.sumAmountByBusinessAndDate(business, today);
-        long todayPaymentCount = transactionHistoryRepository.countByBusinessAndDate(business, today);
-        long todayVisitorCount = transactionHistoryRepository.countDistinctUsersByBusinessAndDate(business, today);
+        String bizNo = business.getBusinessNumber();
+        BigDecimal todayRevenue = transactionHistoryRepository.sumAmountByBusinessNumberAndDate(bizNo, today);
+        long todayPaymentCount = transactionHistoryRepository.countByBusinessNumberAndDate(bizNo, today);
+        long todayVisitorCount = transactionHistoryRepository.countDistinctResidentsByBusinessNumberAndDate(bizNo, today);
 
-        BigDecimal thisMonthRevenue = transactionHistoryRepository.sumAmountByBusinessAndYearMonth(business, thisYear, thisMonth);
-        BigDecimal lastMonthRevenue = transactionHistoryRepository.sumAmountByBusinessAndYearMonth(business, lastMonthYear, lastMonth);
+        BigDecimal thisMonthRevenue = transactionHistoryRepository.sumAmountByBusinessNumberAndYearMonth(bizNo, thisYear, thisMonth);
+        BigDecimal lastMonthRevenue = transactionHistoryRepository.sumAmountByBusinessNumberAndYearMonth(bizNo, lastMonthYear, lastMonth);
         double growthRate = calcGrowthRate(thisMonthRevenue, lastMonthRevenue);
 
         double revisitRate = calcRevisitRate(business);
@@ -91,11 +92,11 @@ public class BusinessService {
     }
 
     private double calcRevisitRate(BusinessInfo business) {
-        List<TransactionHistory> transactions = transactionHistoryRepository.findByBusinessInfo(business);
+        List<TransactionHistory> transactions = transactionHistoryRepository.findByBusinessNumber(business.getBusinessNumber());
         if (transactions.isEmpty()) return 0.0;
 
-        Map<Long, Long> visitCounts = transactions.stream()
-                .collect(Collectors.groupingBy(t -> t.getUser().getId(), Collectors.counting()));
+        Map<String, Long> visitCounts = transactions.stream()
+                .collect(Collectors.groupingBy(TransactionHistory::getResidentNumber, Collectors.counting()));
 
         long totalUsers = visitCounts.size();
         long revisitingUsers = visitCounts.values().stream().filter(c -> c > 1).count();

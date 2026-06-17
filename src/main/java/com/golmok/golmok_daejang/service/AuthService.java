@@ -91,9 +91,10 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public BusinessVerifyData verifyBusiness(BusinessVerifyRequest req) {
-        // 거래내역에서 해당 주민번호와 연관된 사업자 조회
-        List<BusinessInfo> businesses = transactionHistoryRepository
-                .findDistinctBusinessesByResidentNumber(req.getResidentNumber());
+        // 거래내역에서 해당 주민번호와 연관된 사업자번호 조회 후 BusinessInfo 로드
+        List<String> businessNumbers = transactionHistoryRepository
+                .findDistinctBusinessNumbersByResidentNumber(req.getResidentNumber());
+        List<BusinessInfo> businesses = businessInfoRepository.findAllById(businessNumbers);
 
         List<BusinessVerifyData.BusinessItem> items = businesses.stream()
                 .map(b -> BusinessVerifyData.BusinessItem.builder()

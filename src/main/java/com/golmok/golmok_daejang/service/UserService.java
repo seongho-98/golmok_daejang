@@ -1,5 +1,6 @@
 package com.golmok.golmok_daejang.service;
 
+import com.golmok.golmok_daejang.dto.BusinessTypeTransitionRow;
 import com.golmok.golmok_daejang.dto.request.DogamSaveRequest;
 import com.golmok.golmok_daejang.dto.response.UserProfileData;
 import com.golmok.golmok_daejang.entity.*;
@@ -11,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,6 +23,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final CharacterInfoRepository characterInfoRepository;
     private final DogamRepository dogamRepository;
+    private final TransactionHistoryRepository transactionHistoryRepository;
 
     @Transactional(readOnly = true)
     public UserProfileData getProfile(String loginId) {
@@ -49,6 +53,50 @@ public class UserService {
                         .businessName(c.getBusinessInfo().getBusinessName())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> recommendBusinessTypes(String residentNumber) {
+        List<BusinessTypeTransitionRow> rows = transactionHistoryRepository.findBusinessTypeTransitions(residentNumber);
+        if (rows.isEmpty()) return List.of();
+
+        // A: 현재업종 중 빈도 1위
+        String typeA = mostFrequent(
+            rows.stream().map(BusinessTypeTransitionRow::getCurrentType).toList(),
+            Set.of()
+        );
+        if (typeA == null) return List.of();
+
+        // B: A 다음에 가장 많이 나온 업종 (A 제외)
+        String typeB = mostFrequent(
+            rows.stream()
+                .filter(r -> typeA.equals(r.getCurrentType()) && r.getNextType() != null)
+                .map(BusinessTypeTransitionRow::getNextType)
+                .toList(),
+            Set.of(typeA)
+        );
+        if (typeB == null) return List.of(typeA);
+
+        // C: B 다음에 가장 많이 나온 업종 (A, B 제외)
+        String typeC = mostFrequent(
+            rows.stream()
+                .filter(r -> typeB.equals(r.getCurrentType()) && r.getNextType() != null)
+                .map(BusinessTypeTransitionRow::getNextType)
+                .toList(),
+            Set.of(typeA, typeB)
+        );
+
+        return typeC != null ? List.of(typeA, typeB, typeC) : List.of(typeA, typeB);
+    }
+
+    private String mostFrequent(List<String> types, Set<String> excluded) {
+        return types.stream()
+            .filter(t -> !excluded.contains(t))
+            .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+            .entrySet().stream()
+            .max(java.util.Map.Entry.comparingByValue())
+            .map(java.util.Map.Entry::getKey)
+            .orElse(null);
     }
 
     @Transactional
