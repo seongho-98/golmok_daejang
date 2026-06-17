@@ -286,6 +286,38 @@
 
 ---
 
+## 4. 사업자 Agent 분석 (Business Agent)
+
+### 4-1. 사업 정보 Foundry Agent 분석
+
+- **POST** `/api/business/analyze`
+
+사업장명과 사업자주소를 Microsoft Foundry의 Test 에이전트로 전송하여 분석합니다.
+
+**Request**
+```json
+{
+  "businessName": "string",
+  "businessAddress": "string"
+}
+```
+
+**Response**
+```json
+{
+  "businessName": "string",
+  "businessAddress": "string",
+  "agentResponse": "string",
+  "success": true,
+  "message": "string"
+}
+```
+
+> `agentResponse`: Foundry Agent의 분석 결과
+> `success`: 분석 성공 여부
+
+---
+
 ## 부록
 
 ### 희귀도 코드표
