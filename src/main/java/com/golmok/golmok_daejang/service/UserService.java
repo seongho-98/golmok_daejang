@@ -2,6 +2,7 @@ package com.golmok.golmok_daejang.service;
 
 import com.golmok.golmok_daejang.dto.BusinessTypeTransitionRow;
 import com.golmok.golmok_daejang.dto.request.DogamSaveRequest;
+import com.golmok.golmok_daejang.dto.response.BusinessTypeRecommendationData;
 import com.golmok.golmok_daejang.dto.response.UserProfileData;
 import com.golmok.golmok_daejang.entity.*;
 import com.golmok.golmok_daejang.entity.enums.Rarity;
@@ -11,7 +12,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -56,46 +61,80 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public List<String> recommendBusinessTypes(String residentNumber) {
+    public BusinessTypeRecommendationData recommendBusinessTypes(String residentNumber) {
         List<BusinessTypeTransitionRow> rows = transactionHistoryRepository.findBusinessTypeTransitions(residentNumber);
-        if (rows.isEmpty()) return List.of();
+        if (rows.isEmpty()) return BusinessTypeRecommendationData.builder().build();
 
-        // A: 현재업종 중 빈도 1위
-        String typeA = mostFrequent(
-            rows.stream().map(BusinessTypeTransitionRow::getCurrentType).toList(),
-            Set.of()
-        );
-        if (typeA == null) return List.of();
+        // A: 현재업종 중 빈도 1위 (동률이면 최근 거래 우선)
+        String typeA = mostFrequent(rows, BusinessTypeTransitionRow::getCurrentType, Set.of());
+        if (typeA == null) return BusinessTypeRecommendationData.builder().build();
 
-        // B: A 다음에 가장 많이 나온 업종 (A 제외)
-        String typeB = mostFrequent(
-            rows.stream()
-                .filter(r -> typeA.equals(r.getCurrentType()) && r.getNextType() != null)
-                .map(BusinessTypeTransitionRow::getNextType)
-                .toList(),
+        // B: A 다음 전환 업종 1위 → 없으면 현재업종 빈도에서 fallback (A 제외)
+        String typeBFromTransition = mostFrequent(
+            rows.stream().filter(r -> typeA.equals(r.getCurrentType()) && r.getNextType() != null).toList(),
+            BusinessTypeTransitionRow::getNextType,
             Set.of(typeA)
         );
-        if (typeB == null) return List.of(typeA);
+        String typeB = typeBFromTransition != null
+                ? typeBFromTransition
+                : mostFrequent(rows, BusinessTypeTransitionRow::getCurrentType, Set.of(typeA));
 
-        // C: B 다음에 가장 많이 나온 업종 (A, B 제외)
-        String typeC = mostFrequent(
-            rows.stream()
-                .filter(r -> typeB.equals(r.getCurrentType()) && r.getNextType() != null)
-                .map(BusinessTypeTransitionRow::getNextType)
-                .toList(),
-            Set.of(typeA, typeB)
+        // C: B 다음 전환 업종 1위 → 없으면 현재업종 빈도에서 fallback (A, B 제외)
+        Set<String> excludedForC = typeB != null ? Set.of(typeA, typeB) : Set.of(typeA);
+        String typeCFromTransition = typeB == null ? null : mostFrequent(
+            rows.stream().filter(r -> typeB.equals(r.getCurrentType()) && r.getNextType() != null).toList(),
+            BusinessTypeTransitionRow::getNextType,
+            excludedForC
         );
+        String typeC = typeCFromTransition != null
+                ? typeCFromTransition
+                : mostFrequent(rows, BusinessTypeTransitionRow::getCurrentType, excludedForC);
 
-        return typeC != null ? List.of(typeA, typeB, typeC) : List.of(typeA, typeB);
+        return BusinessTypeRecommendationData.builder()
+                .typeA(typeA)
+                .storesA(storesByType(residentNumber, typeA))
+                .typeB(typeB)
+                .storesB(typeB != null ? storesByType(residentNumber, typeB) : List.of())
+                .typeC(typeC)
+                .storesC(typeC != null ? storesByType(residentNumber, typeC) : List.of())
+                .build();
     }
 
-    private String mostFrequent(List<String> types, Set<String> excluded) {
-        return types.stream()
-            .filter(t -> !excluded.contains(t))
-            .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
-            .entrySet().stream()
-            .max(java.util.Map.Entry.comparingByValue())
-            .map(java.util.Map.Entry::getKey)
+    private List<String> storesByType(String residentNumber, String businessType) {
+        return transactionHistoryRepository.findStoreNamesByTypeAndTimeFilter(residentNumber, businessType);
+    }
+
+    private String mostFrequent(List<BusinessTypeTransitionRow> rows,
+                                 Function<BusinessTypeTransitionRow, String> typeExtractor,
+                                 Set<String> excluded) {
+        record TypeStats(long count, LocalDate date, LocalTime time) {}
+
+        Map<String, TypeStats> statsMap = new HashMap<>();
+        for (BusinessTypeTransitionRow row : rows) {
+            String type = typeExtractor.apply(row);
+            if (type == null || excluded.contains(type)) continue;
+            LocalDate rowDate = row.getDate();
+            LocalTime rowTime = row.getTime();
+            statsMap.merge(type,
+                new TypeStats(1, rowDate, rowTime),
+                (existing, ignored) -> {
+                    boolean isNewer = rowDate.isAfter(existing.date()) ||
+                        (rowDate.equals(existing.date()) && rowTime.isAfter(existing.time()));
+                    return new TypeStats(
+                        existing.count() + 1,
+                        isNewer ? rowDate : existing.date(),
+                        isNewer ? rowTime : existing.time()
+                    );
+                }
+            );
+        }
+
+        return statsMap.entrySet().stream()
+            .max(Comparator
+                .<Map.Entry<String, TypeStats>>comparingLong(e -> e.getValue().count())
+                .thenComparing(e -> e.getValue().date())
+                .thenComparing(e -> e.getValue().time()))
+            .map(Map.Entry::getKey)
             .orElse(null);
     }
 

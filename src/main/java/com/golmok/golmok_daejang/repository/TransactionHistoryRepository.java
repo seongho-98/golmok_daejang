@@ -18,7 +18,9 @@ public interface TransactionHistoryRepository extends JpaRepository<TransactionH
             LEAD(business_type, 1) OVER (
                 PARTITION BY resident_number, date
                 ORDER BY time ASC
-            ) AS nextType
+            ) AS nextType,
+            date AS date,
+            time AS time
         FROM transaction_history
         WHERE resident_number = :residentNumber
           AND date >= DATE_SUB(CURDATE(), INTERVAL 3 MONTH)
@@ -33,6 +35,21 @@ public interface TransactionHistoryRepository extends JpaRepository<TransactionH
 
     @Query("SELECT DISTINCT t.businessNumber FROM TransactionHistory t WHERE t.residentNumber = :residentNumber")
     List<String> findDistinctBusinessNumbersByResidentNumber(@Param("residentNumber") String residentNumber);
+
+    @Query(value = """
+        SELECT DISTINCT business_name
+        FROM transaction_history
+        WHERE resident_number = :residentNumber
+          AND business_type = :businessType
+          AND date >= DATE_SUB(CURDATE(), INTERVAL 3 MONTH)
+          AND WEEKDAY(date) = WEEKDAY(CURDATE())
+          AND time >= TIME(NOW())
+          AND time <= ADDTIME(TIME(NOW()), '03:00:00')
+        """, nativeQuery = true)
+    List<String> findStoreNamesByTypeAndTimeFilter(
+            @Param("residentNumber") String residentNumber,
+            @Param("businessType") String businessType
+    );
 
     @Query("SELECT COALESCE(SUM(t.amount), 0) FROM TransactionHistory t WHERE t.businessNumber = :businessNumber AND t.date = :date")
     BigDecimal sumAmountByBusinessNumberAndDate(@Param("businessNumber") String businessNumber, @Param("date") LocalDate date);
