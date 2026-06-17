@@ -19,10 +19,8 @@ public class TransactionHistory {
     @Column(name = "transaction_id")
     private Long transactionId;
 
-    // 주민번호 기준으로 사용자 참조 (거래 시점 기록 목적)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "resident_number", referencedColumnName = "resident_number")
-    private User user; // 주민번호
+    @Column(name = "resident_number", nullable = false, length = 14)
+    private String residentNumber; // 주민번호
 
     @Column(nullable = false, precision = 12, scale = 0)
     private BigDecimal amount; // 금액 (원화)
@@ -36,9 +34,8 @@ public class TransactionHistory {
     @Column(name = "business_name", nullable = false, length = 100)
     private String businessName; // 업체명 (거래 시점 스냅샷)
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "business_number")
-    private BusinessInfo businessInfo; // 사업자등록번호
+    @Column(name = "business_number", nullable = false, length = 12)
+    private String businessNumber; // 사업자등록번호
 
     @Column(nullable = false)
     private String address; // 주소 (거래 시점 스냅샷)

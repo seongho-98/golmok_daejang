@@ -1,6 +1,8 @@
 package com.golmok.golmok_daejang.entity;
 
 import jakarta.persistence.*;
+
+import java.math.BigDecimal;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,4 +28,10 @@ public class BusinessInfo {
 
     @Column(name = "business_type", nullable = false, length = 100)
     private String businessType; // 업태명
+
+    @Column(precision = 10, scale = 7)
+    private BigDecimal latitude; // 위도
+
+    @Column(precision = 10, scale = 7)
+    private BigDecimal longitude; // 경도
 }
